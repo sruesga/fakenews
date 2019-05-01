@@ -3,11 +3,12 @@ import json
 import numpy as np
 
 class Model():
-    def __init__(self, vocab_size=20000, rnn_size=64, learning_rate=1e-4):
+    def __init__(self, vocab_size=20000, rnn_size=64, weights_path='lstm_weights.h5', learning_rate=1e-4):
         self.vocab_size = vocab_size
         self.rnn_size = rnn_size
         self.learning_rate = learning_rate
         self.build_model()
+        self.weights_path = weights_path
     
     def build_model(self):
         self.model = tf.keras.Sequential([
@@ -31,6 +32,12 @@ class Model():
         print("Fitting model...")
         history = self.model.fit(train_data, train_labels, epochs=1,
                     validation_split=0.2)
+    
+    def save_model(self):
+        self.model.save_weights(self.weights_path)
+    
+    def load_model(self):
+        self.model.load_weights(self.weights_path)
 
 if __name__ == '__main__':
     model = Model()
