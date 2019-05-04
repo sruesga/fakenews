@@ -2,27 +2,9 @@ import tensorflow as tf
 import json
 import numpy as np
 
-class Model():
-    def __init__(self, vocab_size=20000, rnn_size=64, weights_path='lstm_weights.h5', learning_rate=1e-4):
-        self.vocab_size = vocab_size
-        self.rnn_size = rnn_size
-        self.learning_rate = learning_rate
-        self.build_model()
-        self.weights_path = weights_path
-    
-    def build_model(self):
-        self.model = tf.keras.Sequential([
-            tf.keras.layers.Embedding(self.vocab_size, self.rnn_size),
-            tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(self.rnn_size)),
-            tf.keras.layers.Dense(64, activation='relu'),
-            tf.keras.layers.Dense(1, activation='sigmoid')
-        ])
-        opt = tf.keras.optimizers.Adam(lr=self.learning_rate)
-        self.model.compile(loss='binary_crossentropy',
-              optimizer='adam',
-              metrics=['accuracy'])
 
-    def load_json(self, json_path):
+class Model():
+    def train_json(self, json_path):
         print("Loading data...")
         raw_data = json.load(open(json_path))
         ids = sorted(list(raw_data['id'].keys()))
@@ -41,8 +23,53 @@ class Model():
     def load_model(self):
         self.model.load_weights(self.weights_path)
 
+
+class RNNModel(Model):
+    def __init__(self, vocab_size=20000, rnn_size=64, weights_path='lstm_weights.h5', learning_rate=1e-4, model_choice='lstm'):
+        self.vocab_size = vocab_size
+        self.rnn_size = rnn_size
+        self.learning_rate = learning_rate
+        self.build_model(model_choice)
+        self.weights_path = weights_path
+    
+    def build_model(self, model_choice):
+        if model_choice == 'lstm':
+            self.model = tf.keras.Sequential([
+                tf.keras.layers.Embedding(self.vocab_size, self.rnn_size),
+                tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(self.rnn_size)),
+                tf.keras.layers.Dense(64, activation='relu'),
+                tf.keras.layers.Dense(1, activation='sigmoid')
+            ])
+        elif model_choice == 'rnn':
+            self.model = tf.keras.Sequential([
+                tf.keras.layers.Embedding(self.vocab_size, self.rnn_size),
+                tf.keras.layers.SimpleRNN(self.rnn_size),
+                tf.keras.layers.Dense(64, activation='relu'),
+                tf.keras.layers.Dense(1, activation='sigmoid')
+            ])
+        opt = tf.keras.optimizers.Adam(lr=self.learning_rate)
+        self.model.compile(loss='binary_crossentropy',
+            optimizer=opt,
+            metrics=['accuracy'])
+
+class ConvModel(Model):
+    def __init__(self, vocab_size=20000, num_filt=32, weights_path='conv_weights.h5', learning_rate=1e-4, model_choice='1dconv'):
+        self.vocab_size = vocab_size
+        self.num_filt = num_filt
+        self.learning_rate = learning_rate
+        self.build_model(model_choice)
+        self.weights_path = weights_path
+
+    def build_model(self, model_choice):
+        if model_choice == '1dconv':
+            self.model = tf.keras.Sequential([])
+            self.model.compile(loss='binary_crossentropy',
+                optimizer='adam',
+                metrics=['accuracy'])
+
+
 if __name__ == '__main__':
-    model = Model()
+    model = RNNModel(model_choice='rnn')
     model.train_json('fake_reliable_news_headlines.json')
 
     
