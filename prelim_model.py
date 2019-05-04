@@ -63,7 +63,10 @@ class ConvModel(Model):
 
     def build_model(self, model_choice):
         if model_choice == '1dconv':
-            self.model = tf.keras.Sequential([])
+            self.model = tf.keras.Sequential([
+                tf.keras.layers.Embedding(self.vocab_size, se)
+
+            ])
             self.model.compile(loss='binary_crossentropy',
                 optimizer='adam',
                 metrics=['accuracy'])
